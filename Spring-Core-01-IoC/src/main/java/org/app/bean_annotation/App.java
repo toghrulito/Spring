@@ -13,6 +13,9 @@ public class App {
         FullTimeMentor ft = container.getBean(FullTimeMentor.class);
         ft.createAccount();
 
+        PartTimeMentor p1 = container.getBean("p1", PartTimeMentor.class);
+        p1.createAccount();
+
 
         String bean = container.getBean(String.class);
         System.out.println(bean);
