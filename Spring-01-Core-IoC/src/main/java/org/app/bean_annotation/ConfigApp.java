@@ -3,6 +3,7 @@ package org.app.bean_annotation;
 import org.springframework.context.annotation.Bean;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class ConfigApp {
@@ -12,7 +13,9 @@ public class ConfigApp {
         return new FullTimeMentor();
     }
 
-    @Bean(name="p1")
+    //@Bean(name="p1")
+    @Bean
+    @Primary
     PartTimeMentor partTimeMentor(){
         return new PartTimeMentor();
     }
