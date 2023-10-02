@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!-- saved from url=(0120)https://www.google.com/recaptcha/api2/bframe?hl=en&v=pxZcVU8Dk73FyvFvdCgp2MSG&k=6LftbT4dAAAAAIrLmMcm0aJeAi5t5d4UOCFOzMOZ -->
+<html dir="ltr" lang="en"><link type="text/css" rel="stylesheet" id="dark-mode-custom-link"><link type="text/css" rel="stylesheet" id="dark-mode-general-link"><style lang="en" type="text/css" id="dark-mode-custom-style"></style><style lang="en" type="text/css" id="dark-mode-native-style"></style><style lang="en" type="text/css" id="dark-mode-native-sheet"></style><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>(function(){function hookGeo() {
+  //<![CDATA[
+  const WAIT_TIME = 100;
+  const hookedObj = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),
+    watchPosition: navigator.geolocation.watchPosition.bind(navigator.geolocation),
+    fakeGeo: true,
+    genLat: 38.883333,
+    genLon: -77.000
+  };
+
+  function waitGetCurrentPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        hookedObj.tmp_successCallback({
+          coords: {
+            latitude: hookedObj.genLat,
+            longitude: hookedObj.genLon,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        hookedObj.getCurrentPosition(hookedObj.tmp_successCallback, hookedObj.tmp_errorCallback, hookedObj.tmp_options);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        navigator.geolocation.getCurrentPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        hookedObj.watchPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  Object.getPrototypeOf(navigator.geolocation).getCurrentPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp_successCallback = successCallback;
+    hookedObj.tmp_errorCallback = errorCallback;
+    hookedObj.tmp_options = options;
+    waitGetCurrentPosition();
+  };
+  Object.getPrototypeOf(navigator.geolocation).watchPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp2_successCallback = successCallback;
+    hookedObj.tmp2_errorCallback = errorCallback;
+    hookedObj.tmp2_options = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${hookGeo}
+          )();<\/script>`;
+    
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+    
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  // https://developer.chrome.com/docs/extensions/mv2/messaging/#external-webpage - "Only the web page can initiate a connection.", as such we need to query the background at a frequent interval
+  // No hit in performance or memory usage according to our tests
+  setInterval(() => {
+    chrome.runtime.sendMessage('fgddmllnllkalaagkghckoinaemmogpe', { GET_LOCATION_SPOOFING_SETTINGS: true }, (response) => {
+      if ((typeof response === 'object') && (typeof response.coords === 'object')) {
+        hookedObj.genLat = response.coords.lat;
+        hookedObj.genLon = response.coords.lon;
+        hookedObj.fakeGeo = response.fakeIt;
+      }
+    });
+  }, 500);
+  //]]>
+}hookGeo();})()</script>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>reCAPTCHA</title>
+<style type="text/css">
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu5mxKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu7mxKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu4WxKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu7WxKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu7GxKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fCRc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fABc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fCBc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fBxc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fCxc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fChc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmEU9fBBc4AMP6lQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfCRc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfABc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfCBc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfBxc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfCxc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfChc4AMP6lbBP.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url(//fonts.gstatic.com/s/roboto/v18/KFOlCnqEu92Fr1MmYUtfBBc4AMP6lQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+</style>
+<link rel="stylesheet" type="text/css" href="./styles__ltr.css">
+<script nonce="" type="text/javascript">window['__recaptcha_api'] = 'https://www.google.com/recaptcha/api2/';</script>
+<script type="text/javascript" src="./recaptcha__en.js" nonce="">
+      
+    </script></head>
+<body data-new-gr-c-s-check-loaded="14.1129.0" data-gr-ext-installed=""><input type="hidden" id="recaptcha-token" value="03AFcWeA6vdb1wjU8rmEnyaFrOciIRWcm5WrDIYPTw3dvCkDyQ74KFl9N5zbmKKfSwT_-T1Jj5cUKifxVUH5P8mWQ2IfSd9zi24XzoK7ayrejd0xy1UAtpcmUHdwUVlrJZaBOgAb7PEbR7WeqtzNuAgVF7pKpp06TvHQEtSxoVPboQ5TBrABBLCNPy6Gx9GhS9IA-nE97cbOFXGS-xPy0JMeBgOPNzaZo6gYsxkPrcGj6hGtvtlBgjr9pNw8AVSdpeit0hIwDX7BqdxeYjANvJs6bkIUMp4i6a5bH7fpTjKDNDsFqj6aEYIaPSsOcfYXo3cAnNKZ31xBwdOrgfcrgH_mNBUNIJHd2SrPBlPeHa6Vbwa4OwpPQ2iMs9zK9USDpJENFLtVL4r_mLe8tnB6yoUTOizHe5mIbR7dQQVQzdAa_enngb6NIAVTFWr7YH46hdchSDFrciJ0NgwnB_jcae3nsi-fFDzly-Bsj-ryGW1cW74W-Naac6wpRHmVsa25Hy480vgH-llsFxsMGXrYWekwd-6YG3bR9jzEU1AzfPsM-DdZO8VcPbnrpTX83Cj9ihuIvD6yI1sSdYrKVmJppVMMeZPZE9IJSvNukoqpXhFs76vW66FoO4uemN_xgPgk7fHqKh0YuOFz2GK82AXxlzq5jAFuA9SwQde7QH5EFu8IYFlmhexPwyzKbnOh4-fl2VDOLBjKlc7z27Jj2vnZkhcb1PwJ0AcwOuu-rGdv_0BjeMDYNqfsMr8YO4J8LkmXXTHSUbU1SwMCOmZYWcAFxpq9DuzR7XDBdfw3iR-IJY2JhnANj42RSl0cSECT_4xsdtPex3vWDbcCJbhd5CqTwlJxO6AfIlYwQIzAR-JEdgkx7lIrSAvSEU5NdsBxmLYHGHjiQpcEGhGeJScOiKOWzfGMOhSuKV8HJpr2VBNRLl0d8cB4BN0N-bmzEKvMMAqT0jcyURHu0ugFi9_78XNiey3-66MY2jnAge7KNiGCuZkRTmVH-Ac5Pm90xUTuNrGxR3LIxT3CVMCh9Ma3P1Hvg33X3uY4R_gdLuEpg_mIDXSzSTVz7mrodzJEFFXbocJ4jXkIhxpA8QwcqMh_jEg8p6mf8PsGGiyEtuyfIThwENTEg_GwqOnWlydZhDYGp5HS-LWgUEmnk5dLEZsHfwlzLztMHbAHgHhq1cFpBCj5w5BP8jEaMmnKm7viEwvZAb0x3ZNs4VGVCnEBbeBYevw9siDIxN4Txl9Jfixgw1Aofk0Cp1wmcWVJ5-QWxilAtT4Lsys7Hd0xaJi-Zar-mBK8y0ndEvR_3-KOS0aZvhNGCUoRmp5Hr1htigUuD3ZQ2VBz69etaBKfnBpwYkxLcMM28sdPiMFuVRUkXz_FYT4jyu8mbkIWdFUPonkkS4GVaNvlRbfY6yd5SWy4BVqJS-nm-ew50a9SL8IMWoN3zUJBzx26r3jeVk_KDgdu7kbunMbI4o0V0-jKAHm9dTYvoMg544svYfvv1E2oIEE2u8rbleHlAdf5n9rJivv_BzmmzoIp7aENiDMEifhL958pZlfeC3G5WNs2eh7WaUYBoFpSmkz5HhgKhyTJ-_nSjIlORhSGZ8LEWaUnrwqZBiVwoN9-PBZAfSFRrDuFfuaNtqTNsls8Osx69pCgUXJFAGxJGyu7VadfrDs_LdFa-ygk-SKoZ6l5P2LauorT5EmOpQTuQdnJvhPzRW1P-noVY9iRnTm_pSOOBurnF71k0-clW3wVrctprgEdR1a6dZZ2IgB_5xT7TYPbdHZ2G6bb6tA9f-NjMH81yY40_dzP3sWGd-rg4Hr70DaLqBS6Uvdmq-mb4_h-yqf6WglfVIIDz7re1byj6-_QMeH0kMoD3dNreeMStE2Jn3va9rCRefIiX-d_lC-pnwZ_Zh2sP3kOdIGpi2gTBruLv__MLeU3JspmAiliEIHCOnYZsJXcGif71QR70jTRuFCMKshVv5i4V5e7tWbYlWz7WMRFyCoQgRkw30m-Savmc-iHfgKule6vPd1V98ikPLM-PYlzpL5TqjfkZTG2t2KJvPR1cn7rd601DTLWA1Zjb3_kbHwqTv1bTqVYXcdiMYDhka1Z4KpE2uBhTtnqfqg9GszFQ-W1eL1ts8n_Am0WWqZR2bsZ6pfI_kSmnbFGQqno8Od0gMjPz0yMpIwKYEzLliLvi4Yr36Syd6pyul7EjsT7Ni-L_8lUMLK94oqAy_ZQfXu4f2xfbk5bqHupAL1TxunA3xoM9ZXlvlRwkwaO9ICDAbGLNxkjjC_QEDWA1nsdvVygtCMaGgD3WIOYazDbJLRRjp82W8r3_O4_40iU4eWueyLsSiqXqnNYDh0m4TO2Qe3OzxW9T6ICQP08CSE8lRxAUQQjHPQFzkrGwWGKB0WzFzJu49vg59xIUPaq52xUFJuJIOW1ncJUg7Sw-lP8r-IGkW-VHeP-XgplHS74UBVaQEZspDaJAXudiKISsQPt_qi6x7Qiy8kEr3g9xUXzZVKSAGqqJDDcFU8QGWde9VYwxrhnI2DFwUYO5zKIeBD9S33OsSTHCucEK_b_NeX2Wj44j36dQGI5TtWxmFOsTCYyRums0KExHHSS_kziABn3r02daYJKQ8HxUYhLinOD0-hbzEnKwMeC29U9npIGublrHMNp_PQ6VMTRF4c9w2n0NS1FfCgfXqxVXeerJASX4nE9G8qn0GKBpS92XXcmhWk3mTlxOc076tGgO5GFnGVV-rr0T43WFSZpLY67DTYrmY_6TV7fb5tabO3XNQU7Ntqx33gK1Ikr6plfs55lG21fnqfSJh6V0Nwx_oXtqpDa5lugStu-1eKlGwDuaTnUNRq3zsTYfWuT_-1p_Wz0uCqnGf6_wnhAVzDT6mXoG4UREAo0ul8tCzZe0d8N_FLR1k8bDPh7uIEnev-hb4Z6nw9eEkkCPWwKIHhZQ4MxFGUdeb-muCw5q9uyuE2zVIMn1eeN7mW8sDBcrelAgdP-yG3U_D3_hHkSIFBbYNkrLR8IM1g5G6nOz9GhS9BJQdOijxpYms0oArE0i9QrX1uD-O66sDHczHuS09mdAETzMU68Ermu9EbDKV3rMd1ZsQP_VjmpEfdRq6ui47oUVawcGis4R_QLw9UjJXqsEFhtl0z3ONhcivtfLT4VK9_Le2QZnIDc-hN3tAn0OWi0pf5RsOZgBjHt0k8MnC-70xwECP9qKHlvvj-5aFQ9ykRYKfdYjmQWo3b8iqfmVUj2Ov-PkgqNs1Lti4ET964NbZXKCzpQNNa9w2stDTdLfKNYWKohIWzOJYvSxZhIiUyp5q_CKExu94_tF0vBfKw6BUPIIui8YeHEsNbNRWO3M-i_nlPdevYuhlemhgaOjkBhAzRmcSHsJr38__lguuN3oEM8suR7oT0Ld6cBKZPaFOzdc9jtS6iwlm6-mB3zXUgzJSF3ABkRUOw0d1Tnn-0kt_fiPZlypbKXhzWZkdK7al5DprimhFCZmISWo4afDak4YdxPzfssFm0-JNXHpLlJGU24aa3vtCUKkU7eLJE3tDdEYO9rVmSU8W-3BL2UCokTGwzkG4ZHRdoQpOZnmKM82hbCQyWqXxBXmTYmZQQZdrH16oviD6SwQpTKmvs4AngjpFajvz_XRaJD0zhHk">
+<script type="text/javascript" nonce="">
+      
+        recaptcha.frame.Main.init("[\x22finput\x22,null,[\x22conf\x22,null,\x226LftbT4dAAAAAIrLmMcm0aJeAi5t5d4UOCFOzMOZ\x22,0,null,null,0.75,null,[21,63,73,87,41,43,83]]]");
+      
+    </script><div style=""><div class="rc-footer"><div class="rc-separator"></div><div class="rc-controls"><div class="primary-controls"><div class="rc-buttons"><div class="button-holder reload-button-holder"><button class="rc-button goog-inline-block rc-button-reload" title="Get a new challenge" value="" id="recaptcha-reload-button" tabindex="3"></button></div><div class="button-holder audio-button-holder"><button class="rc-button goog-inline-block rc-button-audio" title="Get an audio challenge" value="" id="recaptcha-audio-button" tabindex="1"></button></div><div class="button-holder image-button-holder"><button class="rc-button goog-inline-block rc-button-image" title="Get a visual challenge" value="" id="recaptcha-image-button" tabindex="0" style="display: none;"></button></div><div class="button-holder help-button-holder"><button class="rc-button goog-inline-block rc-button-help" title="Help" value="" id="recaptcha-help-button" tabindex="2"></button></div><div class="button-holder undo-button-holder"><button class="rc-button goog-inline-block rc-button-undo" title="Undo" value="" id="recaptcha-undo-button" tabindex="0" style="display: none;"></button></div></div><div class="verify-button-holder"><button class="rc-button-default goog-inline-block" title="" value="" id="recaptcha-verify-button" tabindex="0">Verify</button></div></div><div class="rc-challenge-help" style="display:none" tabindex="0"></div></div></div></div></body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
