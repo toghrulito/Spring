@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{index.page.title}">Title</title>
+</head>
+<body>
+<h2>Welcome New Student</h2>
+<h2 th:text="${students.get(0).firstName}"></h2>
+<h2 th:text="${students.get(0).lastName}"></h2>
+
+
+
+
+<h2 th:text="${'Welcome ' + students.get(0).lastName}"></h2>
+<a th:href="@{https://cydeo.com}">Cydeo Home Page</a><br>
+
+<a th:href="@{/student/welcome}">Welcome Page</a>
+
+
+
+<a th:href="@{/student/welcome(id=3)}">Link 1</a><br>
+<a th:href="@{/student/welcome(id=${students.get(0).firstName})}">Link 3</a><br>
+
+<h2>List of Names</h2>
+
+<ul>
+  <li th:each=" student : ${students}" th:text="${student.firstName}"> Courses</li>
+</ul>
+
+<!-- Conditional Logic:-->
+
+<div th:if="${students.get(0).age > 25 ? 'ELIGIBLE' :' NOT ELIGIBLE'}"></div>
+
+<div>
+  <span th:if="${students.get(0).getState()== 'Arizona'}">Arizona</span>
+  <span th:unless="${students.get(0).getState()== 'Arizona'}">Not Arizona</span>
+</div>
+
+
+
+</body>
+</html>
