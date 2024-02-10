@@ -11,6 +11,14 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Spring-11-ORM-Mapping-OneToOne" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Spring-11-ORM-Mapping-OneToOne" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

@@ -7,6 +7,7 @@
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/Spring-10-ORM-TableCreation" />
+    <file type="web" url="file://$PROJECT_DIR$/Spring-11-ORM-Mapping-OneToOne" />
   </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
