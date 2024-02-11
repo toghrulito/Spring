@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Spring.iml" filepath="$PROJECT_DIR$/.idea/Spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Spring-11-ORM-Mapping-OneToOne.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Spring-11-ORM-Mapping-OneToOne.main.iml" />
     </modules>
   </component>
 </project>
