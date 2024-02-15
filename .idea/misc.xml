@@ -8,6 +8,7 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/Spring-10-ORM-TableCreation" />
     <file type="web" url="file://$PROJECT_DIR$/Spring-11-ORM-Mapping-OneToOne" />
+    <file type="web" url="file://$PROJECT_DIR$/Spring12-ORM-OneToMany-ManyToMany" />
   </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
@@ -23,6 +24,7 @@
         <option value="$PROJECT_DIR$/Spring-07-Spring-MVC-Controller/pom.xml" />
         <option value="$PROJECT_DIR$/Spring-08-Spring-MVC-Model/pom.xml" />
         <option value="$PROJECT_DIR$/Spring-09-Spring-Thymeleaf/pom.xml" />
+        <option value="$PROJECT_DIR$/Spring-12-ORM-OneToOne-ManyToOne/pom.xml" />
       </list>
     </option>
   </component>
