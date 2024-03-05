@@ -1,13 +1,11 @@
 package com.cydeo.bootstrap;
 
-import com.cydeo.entity.Employee;
+import com.cydeo.repository.CourseRepository;
 import com.cydeo.repository.DepartmentRepository;
 import com.cydeo.repository.EmployeeRepository;
 import com.cydeo.repository.RegionRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class DataGenerator implements CommandLineRunner {
@@ -18,10 +16,13 @@ public class DataGenerator implements CommandLineRunner {
 
     private final EmployeeRepository employeeRepository;
 
-    public DataGenerator(RegionRepository repository, DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
+    private final CourseRepository courseRepository;
+
+    public DataGenerator(RegionRepository repository, DepartmentRepository departmentRepository, EmployeeRepository employeeRepository, CourseRepository courseRepository) {
         this.regionRepository = repository;
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
+        this.courseRepository = courseRepository;
     }
 
     @Override
@@ -49,9 +50,54 @@ public class DataGenerator implements CommandLineRunner {
         System.out.println("--------------------------Employee Start - Time-----------------------------------");
 
         //System.out.println(" findAllByEmail " + employeeRepository.findAllByEmail(""));
-        System.out.println(" findAllByEmail " + employeeRepository.findBySalaryIsGreaterThan(166000));
+        //System.out.println(" findAllByEmail " + employeeRepository.findBySalaryIsGreaterThan(166000));
+        System.out.println(" Details " + employeeRepository.getEmployeeDetail());
+        System.out.println(" Details " + employeeRepository.getEmployeeSalary());
 
-        System.out.println("-------------------------- Department End - Time-----------------------------------");
+
+
+
+
+        System.out.println("-------------------------- EmployeeEnd - Time-----------------------------------");
+
+        System.out.println("--------------------------Courses Start - Time-----------------------------------");
+
+        courseRepository.findByCategory("Spring").forEach(System.out::println);
+
+        System.out.println("---------------------------------------------------------------------------");
+
+        courseRepository.findByCategoryOrderByName("Spring").forEach(System.out::println);
+
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println(courseRepository.existsByName("Java script"));
+        System.out.println("--------------------------Courses End- Time-----------------------------------");
+        System.out.println("-----------------COURSE START-----------------");
+
+        courseRepository.findByCategory("Spring").forEach(System.out::println);
+
+        System.out.println("---------------------------");
+
+        courseRepository.findByCategoryOrderByName("Spring").forEach(System.out::println);
+
+        System.out.println("---------------------------");
+
+        System.out.println(courseRepository.existsByName("JavaScript for All"));
+
+        System.out.println("---------------------------");
+
+        System.out.println(courseRepository.countByCategory("Spring"));
+
+        System.out.println("---------------------------");
+
+        courseRepository.findByNameStartsWith("Scalable").forEach(System.out::println);
+
+        System.out.println("---------------------------");
+
+        courseRepository.streamByCategory("Spring").forEach(System.out::println);
+
+
+
+        System.out.println("-----------------COURSE  END-----------------");
 
     }
 }
