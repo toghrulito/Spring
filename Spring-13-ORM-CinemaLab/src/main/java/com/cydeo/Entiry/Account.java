@@ -3,11 +3,14 @@ package com.cydeo.Entiry;
 import com.cydeo.Enum.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Table(name = "account_details")
 public class Account extends BaseEntity{
 
@@ -33,12 +36,9 @@ public class Account extends BaseEntity{
                 ", country='" + country + '\'' +
                 ", state='" + state + '\'' +
                 ", city='" + city + '\'' +
-                ", age=" + age +
+                ", age='" + age + '\'' +
                 ", postalCode='" + postalCode + '\'' +
                 ", role=" + role +
-                ", user=" + user +
                 '}';
     }
-
-
 }
